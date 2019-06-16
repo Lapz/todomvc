@@ -122,6 +122,8 @@ export default {
           this.todos[i].done = !this.todos[i].done;
         }
       }
+
+      localStorage.setItem("todos", JSON.stringify(this.todos));
     },
 
     updateDescription: function(id) {
@@ -130,6 +132,8 @@ export default {
           this.todos[i].description = this.newTodoDescription;
         }
       }
+
+      localStorage.setItem("todos", JSON.stringify(this.todos));
     },
 
     clearCompleted: function() {
@@ -144,6 +148,8 @@ export default {
       }
 
       this.todos = new_todos;
+
+      localStorage.setItem("todos", JSON.stringify(this.todos));
     },
 
     deleteTodo: function(id) {
@@ -165,6 +171,8 @@ export default {
       for (let i = 0; i < this.todos.length; i += 1) {
         this.todos[i].done = true;
       }
+
+      localStorage.setItem("todos", JSON.stringify(this.todos));
     },
 
     setFilter: function(filter) {
