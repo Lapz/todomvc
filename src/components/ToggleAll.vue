@@ -5,11 +5,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "ToggleAll",
-  props: ["toggleFunc", "seen"]
-};
+<script lang="ts">
+import { Component, Vue, Prop } from "vue-property-decorator";
+
+@Component
+export default class ToggleAll extends Vue {
+  @Prop() toggleFunc!: () => void;
+  @Prop() seen!: boolean;
+}
 </script>
 
 <style>

@@ -2,7 +2,7 @@
   <div id="app">
     <section class="todoapp">
       <header class="header">
-        <h1>todos</h1>
+        <h1>todo</h1>
         <input
           class="new-todo"
           type="text"
@@ -16,7 +16,7 @@
       <TodoList
         v-if="todos.length != 0"
         :todos="todos"
-        v-bind:update-todo-status="updateDone"
+        v-bind:toggle-done-func="toggleDone"
         v-bind:delete-todo="deleteTodo"
         v-bind:toggle-all="toggleAll"
       ></TodoList>
@@ -43,153 +43,150 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
+import Todo from "./interfaces/Todo";
+import Filter from "./interfaces/Filter";
 import TodoControls from "./components/TodoControls.vue";
 import TodoList from "./components/TodoList.vue";
 
-export default {
-  name: "app",
+@Component({
   components: {
     TodoControls,
     TodoList
-  },
+  }
+})
+export default class App extends Vue {
+  todos: Array<Todo> = [];
+  newTodoDescription: string = "";
+  selected: string = "All";
+  filters: Array<Filter> = [
+    {
+      name: "All",
+      fn: function(_todo: Todo): boolean {
+        return true;
+      }
+    },
+    {
+      name: "Active",
+      fn: function(todo: Todo): boolean {
+        return todo.done == false;
+      }
+    },
+    {
+      name: "Completed",
+      fn: function(todo: Todo): boolean {
+        return todo.done == true;
+      }
+    }
+  ];
 
-  mounted: function() {
+  mounted(): void {
     if (localStorage.getItem("todos") != undefined) {
-      this.todos = JSON.parse(localStorage.getItem("todos"));
-      // console.log(this.data.todos);
+      this.todos = JSON.parse(localStorage.getItem("todos")!);
     }
-  },
-  data: function() {
-    return {
-      newTodoDescription: "",
-      todos: [],
-      selected: "All",
-      filters: [
-        {
-          name: "All",
-          fn: function(_todo) {
-            return true;
-          }
-        },
-        {
-          name: "Active",
-          fn: function(todo) {
-            return todo.done == false;
-          }
-        },
-        {
-          name: "Completed",
-          fn: function(todo) {
-            return todo.done == true;
-          }
-        }
-      ]
+  }
+
+  addTodo(): void {
+    let new_todo: Todo = {
+      id: this.todos.length > 0 ? this.todos[this.todos.length - 1].id + 1 : 0,
+      description: this.newTodoDescription,
+      done: false,
+      seen: true
     };
-  },
-  computed: {
-    todoCount: function() {
-      let v = this.todos.reduce((acc, current) => {
-        if (!current.done) {
-          acc += 1;
-        }
 
-        return acc;
-      }, 0);
+    this.todos.push(new_todo);
 
-      return v;
+    this.newTodoDescription = "";
+
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
+
+  toggleDone(id: number): void {
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (this.todos[i].id == id) {
+        this.todos[i].done = !this.todos[i].done;
+      }
     }
-  },
-  methods: {
-    addTodo: function() {
-      let new_todo = {
-        id:
-          this.todos.length > 0 ? this.todos[this.todos.length - 1].id + 1 : 0,
-        description: this.newTodoDescription,
-        done: false,
-        seen: true
-      };
 
-      this.todos.push(new_todo);
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
 
-      this.newTodoDescription = "";
+  updateDescription(id: number): void {
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (this.todos[i].id == id) {
+        this.todos[i].description = this.newTodoDescription;
+      }
+    }
 
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
-    updateDone: function(id) {
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (this.todos[i].id == id) {
-          this.todos[i].done = !this.todos[i].done;
-        }
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
+
+  clearCompleted(): void {
+    let new_todos = new Array();
+
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (this.todos[i].done) {
+        continue;
       }
 
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
+      new_todos.push(this.todos[i]);
+    }
 
-    updateDescription: function(id) {
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (this.todos[i].id == id) {
-          this.todos[i].description = this.newTodoDescription;
-        }
+    this.todos = new_todos;
+
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
+
+  deleteTodo(id: number): void {
+    let new_todos = new Array();
+
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (this.todos[i].id == id) {
+        continue;
       }
 
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
+      new_todos.push(this.todos[i]);
+    }
 
-    clearCompleted: function() {
-      let new_todos = new Array();
+    this.todos = new_todos;
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
 
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (this.todos[i].done) {
-          continue;
-        }
+  toggleAll(): void {
+    for (let i = 0; i < this.todos.length; i += 1) {
+      this.todos[i].done = true;
+    }
 
-        new_todos.push(this.todos[i]);
-      }
+    localStorage.setItem("todos", JSON.stringify(this.todos));
+  }
 
-      this.todos = new_todos;
+  setFilter(filter: string): void {
+    this.selected = filter;
+  }
 
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
-
-    deleteTodo: function(id) {
-      let new_todos = new Array();
-
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (this.todos[i].id == id) {
-          continue;
-        }
-
-        new_todos.push(this.todos[i]);
-      }
-
-      this.todos = new_todos;
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
-
-    toggleAll: function() {
-      for (let i = 0; i < this.todos.length; i += 1) {
-        this.todos[i].done = true;
-      }
-
-      localStorage.setItem("todos", JSON.stringify(this.todos));
-    },
-
-    setFilter: function(filter) {
-      this.selected = filter;
-    },
-
-    filter: function(pred) {
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (pred(this.todos[i])) {
-          this.todos[i].seen = true;
-        } else {
-          this.todos[i].seen = false;
-        }
+  filter(pred: (todo: Todo) => boolean) {
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (pred(this.todos[i])) {
+        this.todos[i].seen = true;
+      } else {
+        this.todos[i].seen = false;
       }
     }
   }
-};
+
+  get todoCount(): number {
+    let v = this.todos.reduce((acc, current) => {
+      if (!current.done) {
+        acc += 1;
+      }
+
+      return acc;
+    }, 0);
+
+    return v;
+  }
+}
 </script>
 
 <style>

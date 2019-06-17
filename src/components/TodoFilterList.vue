@@ -9,22 +9,28 @@
     ></TodoFilter>
   </ul>
 </template>
-<script>
+<script lang="ts">
 import TodoFilter from "./TodoFilter.vue";
+import { Component, Prop, Vue } from "vue-property-decorator";
+import Filter from "../interfaces/Filter";
+import Todo from "../interfaces/Todo";
 
-export default {
-  name: "TodoFilterList",
-  props: ["filters", "current", "setCurrentFunc", "filterFunc"],
-  methods: {
-    handler: function(filterName, predicate) {
-      this.setCurrentFunc(filterName);
-      this.filterFunc(predicate);
-    }
-  },
+@Component({
   components: {
     TodoFilter
   }
-};
+})
+export default class TodoFilterList extends Vue {
+  @Prop() filters!: Array<Filter>;
+  @Prop() current!: string;
+  @Prop() setCurrentFunc!: (filter: string) => void;
+  @Prop() filterFunc!: (predicate: (todo: Todo) => boolean) => void;
+
+  handler(filterName: string, predicate: (todo: Todo) => boolean): void {
+    this.setCurrentFunc(filterName);
+    this.filterFunc(predicate);
+  }
+}
 </script>
 
 <style>

@@ -5,13 +5,13 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: "TodoCounter",
-  props: {
-    count: Number
-  }
-};
+<script lang="ts">
+import { Vue, Prop, Component } from "vue-property-decorator";
+
+@Component
+export default class TodoCounter extends Vue {
+  @Prop() count!: number;
+}
 </script>
 
 <style>

@@ -6,38 +6,43 @@
         v-for="item in seenTodos"
         :todo="item"
         :key="item.id"
-        :toggle-func="updateTodoStatus"
+        :toggle-func="toggleDoneFunc"
         :remove-func="deleteTodo"
       ></TodoItem>
     </ul>
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import ToggleAll from "./ToggleAll.vue";
 import TodoItem from "./TodoItem.vue";
+import { Prop, Component, Vue } from "vue-property-decorator";
+import Todo from "../interfaces/Todo";
 
-export default {
-  name: "TodoList",
-  props: ["todos", "updateTodoStatus", "deleteTodo", "toggleAll"],
+@Component({
   components: {
     ToggleAll,
     TodoItem
-  },
-  computed: {
-    seenTodos: function() {
-      let seen_todos = new Array();
-
-      for (let i = 0; i < this.todos.length; i += 1) {
-        if (this.todos[i].seen) {
-          seen_todos.push(this.todos[i]);
-        }
-      }
-
-      return seen_todos;
-    }
   }
-};
+})
+export default class TodoList extends Vue {
+  @Prop() todos!: Array<Todo>;
+  @Prop() toggleDoneFunc!: (id: number) => void;
+  @Prop() deleteTodo!: (id: number) => void;
+  @Prop() toggleAll!: () => void;
+
+  get seenTodos(): Array<Todo> {
+    let seen_todos = new Array();
+
+    for (let i = 0; i < this.todos.length; i += 1) {
+      if (this.todos[i].seen) {
+        seen_todos.push(this.todos[i]);
+      }
+    }
+
+    return seen_todos;
+  }
+}
 </script>
 
 <style>

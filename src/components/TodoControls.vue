@@ -12,25 +12,27 @@
   </footer>
 </template>
 
-<script>
+<script lang="ts">
 import TodoCounter from "./TodoCounter.vue";
-import TodoFilterList from "./TodoFilterList";
+import TodoFilterList from "./TodoFilterList.vue";
+import Todo from "../interfaces/Todo";
+import Filter from "../interfaces/Filter";
+import { Vue, Prop, Component } from "vue-property-decorator";
 
-export default {
-  name: "TodoControls",
-  props: [
-    "count",
-    "clearFunc",
-    "filters",
-    "selectedFilter",
-    "setFilter",
-    "filterFunc"
-  ],
+@Component({
   components: {
     TodoCounter,
     TodoFilterList
   }
-};
+})
+export default class TodoControls extends Vue {
+  @Prop() count!: number;
+  @Prop() clearFunc!: () => void;
+  @Prop() filters!: Array<Filter>;
+  @Prop() selectedFilter!: string;
+  @Prop() setFilter!: (filter: string) => void;
+  @Prop() filterFunc!: (pred: (todo: Todo) => boolean) => void;
+}
 </script>
 
 <style>

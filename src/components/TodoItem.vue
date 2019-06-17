@@ -9,27 +9,27 @@
   </li>
 </template>
 
-<script>
-export default {
-  name: "TodoItem",
-  props: ["todo", "toggleFunc", "removeFunc"],
-  data: function() {
-    return {
-      editing: false
-    };
-  },
-  computed: {
-    getClass: function() {
-      if (this.todo.done) {
-        return "completed";
-      } else if (this.editing) {
-        return "editing";
-      } else {
-        return "";
-      }
+<script lang="ts">
+import Todo from "../interfaces/Todo";
+import { Vue, Component, Prop } from "vue-property-decorator";
+
+@Component
+export default class TodoItem extends Vue {
+  editing: boolean = false;
+
+  @Prop() todo!: Todo;
+  @Prop() toggleFunc!: (id: number) => void;
+  @Prop() removeFunc!: (id: number) => void;
+  get getClass(): string {
+    if (this.todo.done) {
+      return "completed";
+    } else if (this.editing) {
+      return "editing";
+    } else {
+      return "";
     }
   }
-};
+}
 </script>
 
 <style>
